@@ -40,15 +40,7 @@ https://github.com/opencontainers/image-spec
 # Container Runtimes
 
 <details>
-<<<<<<< HEAD
 <summary>Click to expand <img src="img/runc.PNG"></summary>
-=======
-<summary>Click to expand <img src="img/runc.png"></summary>
-<<<<<<< HEAD
->>>>>>> 038061d... file extension fix
-=======
->>>>>>> 038061d3ca8ae488367fb228d517ab05296bea84
->>>>>>> 74799a81cb6b47a6ffc54dbb3da1ec47f524afa5
 
 https://github.com/opencontainers/runc
 
@@ -125,17 +117,7 @@ sudo runc delete -f busybox
 
 
 <details>
-<<<<<<< HEAD
 <summary>Click to expand <img src="img/podman.PNG"></summary>
-<img src="img/comparison-v1.PNG">
-=======
-<summary>Click to expand <img src="img/podman.png"></summary>
-<img src="img/comparison-v1.png">
-<<<<<<< HEAD
->>>>>>> 038061d... file extension fix
-=======
->>>>>>> 038061d3ca8ae488367fb228d517ab05296bea84
->>>>>>> 74799a81cb6b47a6ffc54dbb3da1ec47f524afa5
 <img src="img/history.jpg">
 <table>
 <td>Install podman
