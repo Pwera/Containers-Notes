@@ -16,8 +16,9 @@ The appc specification intends to speed up the design and the deployment of a co
 </details>
 
 
+<details>
+<summary>Click to expand <img src=img/oci.PNG href="#"></summary>
 
-<img src=img/oci.PNG>
 ### Container Image Standards - Open Container Initiative (OCI)
 
 The Open Container Initiative (OCI) was introduced in 2015 by Docker together with other leaders in the container industry. One of the container runtimes implementing the OCI specification is runC.
@@ -34,7 +35,7 @@ https://github.com/opencontainers/runtime-spec
 - Image Format Specification 
 https://github.com/opencontainers/image-spec
 
-
+</details>
 
 
 # Container Runtimes
