@@ -3,7 +3,7 @@
 # Standards
 
 <details>
-<summary>Click to expand <img src=img/appc.png></summary>
+<summary>Click to expand <img src=img/appc.PNG></summary>
 
 ### Container Image Standards - App Container (appc)
 
