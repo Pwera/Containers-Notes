@@ -308,6 +308,171 @@ https://github.com/Pwera/Docker-Notes
 </details>
 
 
+# Linux Kernel Network Namespaces
+
+With network namespaces, you can have different and separate instances of network interfaces and routing tables that operate independent of each other. Kubernetes doeas create docker container with Network None, and then apply bridge(CNI) on that.
+
+<table>
+<tr>
+<td>Create<br> network <br>namespace
+<td>
+
+``` bash
+ip netns add red
+ip netns add blue
+```
+<tr>
+<td>Show netwok namespaces
+<td>
+
+```bash
+ip netns 
+```
+<tr>
+<td>show interfaces on hosts
+<td>
+
+```bash
+ip link  
+```
+
+<tr>
+<td>Show red namespace interfaces
+<td>
+
+```bash
+ip netns exec red ip link
+ip netns exec red arp
+ip netns exec red route
+```
+
+<tr>
+<td>Connect two namespaces
+<td>
+
+```bash
+ip link add veth-red type veth peer name veth-blue
+```
+
+<tr>
+<td>Attach network interface to namespace
+<td>
+
+```bash
+ip link set veth-red netns red
+ip link set veth-blue netns blue
+```
+
+<tr>
+<td>Assign IP to interface
+<td>
+
+```bash
+ip -n red addr add 192.168.15.1/24 dev veth-red
+```
+
+<tr>
+<td>Wakeup interface
+<td>
+
+```bash
+ip -n red link set veth-red up
+```
+
+
+<tr>
+<td>Connection test
+<td>
+
+```bash
+ip netns exec red ping $(BLUE_NAMESPACE_IP)
+```
+
+<tr>
+<td>Setup DNS entries
+<td>
+
+```bash
+cat /etc/resolv.conf
+nameserver 192.168.1.100
+```
+
+<tr>
+<td>Search DNS domains
+<td>
+
+```bash
+/etc/resolv.conf
+search my.company.com  prod.mycompany.com
+#Enable to call "ping web" instead of "ping web.my.company.com"
+```
+
+<tr>
+<td>
+<td>
+
+```bash
+ip link -> show interfaces
+ip addr -> show IPs assigned to this interfaces
+ip addr add (IP)/24 dev eth0   -> connect hosts to a switch
+```
+
+<tr>
+<td>Show kernel routing table
+<td>
+
+```bash
+route 
+```
+
+<tr>
+<td>Modify routing table
+<td>
+
+```bash
+ip route add (DESTINATION_IP)/24 via (GATEWAY_IP)
+```
+
+<tr>
+<td>Change DNS order call, between
+<td>
+
+```bash
+/etc/nsswitch.conf 
+```
+
+<tr>
+<td>Debug network namespaces created with docker
+<td>
+
+```bash
+ip link  --> docker0 on host = bridge
+ip addr  --> ip for interaface 
+ln -s /var/run/docker/netns  /var/run/netns 
+ip netns  --> list the namespaces
+docker run -d --name=nginx nginx
+docker inspect nginx --> .NetworkSettings.SandBoxID  starts with network namespace prefix
+ip link  --> new interface veth which is attached to docker0
+ip -n(NETWORK_NAMESPACE_ID) link --> new interface veth which is attached to network namespace
+ip -n(NETWORK_NAMESPACE_ID) addr --> show assigned IP within container namespace
+docker run -d -p8080:80 --name=nginx nginx 
+ip tables -t nat -ADOCKER -j DNAT --dport 8080 --to-destination 172.17.0.3:80  --> forward traffic from host do container 
+iptables -nvL -t nat  --> show iptables rules
+```
+
+<tr>
+<td>Virtual Network technologies
+<td>
+
+```bash
+Bridge
+Ovs Open vSwitch
+```
+
+</details>
+</table>
+
+
 
 # Linux features
 
