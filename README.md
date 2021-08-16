@@ -369,6 +369,7 @@ ip link set veth-blue netns blue
 
 ```bash
 ip -n red addr add 192.168.15.1/24 dev veth-red
+ip -n red addr add 192.168.15.2/24 dev veth-blue
 ```
 
 <tr>
@@ -381,11 +382,65 @@ ip -n red link set veth-red up
 
 
 <tr>
-<td>Connection test
+<td>Connection test(between two namespaces)
 <td>
 
 ```bash
 ip netns exec red ping $(BLUE_NAMESPACE_IP)
+```
+
+<tr>
+<td>Create virtual switch (another interface)
+<td>
+
+```bash
+ip link add v-net-o type bridge
+ip link set dev v-net-0 up
+ip -n red link del veth-red #veth-blue will be delated
+```
+
+<tr>
+<td>
+<td>
+
+```bash
+ip link add veth-red type veth peer name veth-red-br
+ip link add veth-blue type veth peer name veth-blue-br
+
+```
+
+<tr>
+<td>Connect veth-red & veth-blue with v-net-0
+<td>
+
+```bash
+ip link set veth-red netns red
+ip link set veth-red-br master v-net-0
+ip link set veth-blue netns blue
+ip link set veth-blue-br master v-net-0
+
+```
+
+<tr>
+<td>Set IP and wakeup
+<td>
+
+```bash
+ip -n red addr add 192.168.15.1 dev veth-red
+ip -n red addr add 192.168.15.2 dev veth-blue
+ip -n red link set veth-red up
+ip -n red link set veth-blue up
+
+```
+
+<tr>
+<td>Assign IP into interface v-net-0
+<td>
+
+```bash
+ip addr add 192.168.15.5/24 dev v-net-0
+ping 192.168.15.1 # now will work
+
 ```
 
 <tr>
@@ -467,6 +522,40 @@ iptables -nvL -t nat  --> show iptables rules
 ```bash
 Bridge
 Ovs Open vSwitch
+```
+
+<tr>
+<td>Requirements of K8s networking for CNI
+<td>
+
+```bash
+- Every pod should have an IP address.
+- Every pod should be able to communicate with every other pod in the same node
+- Every pod should be able to communicate with every other pod on other nodes without NAT
+
+```
+
+<tr>
+<td>Script run by CNI
+
+<br>CNI configuration in kublet
+<td>
+
+```bash
+--cni-conf-dir=/etc/cni/net.d
+--cni-bin-dir=/etc/cni/bin
+./net-script.sh add <container> <namespace>
+
+```
+
+<tr>
+<td>Cluster IP range<br>
+kube-proxy option
+<td>
+
+```bash
+--service-cluster-ip-range
+
 ```
 
 </details>
