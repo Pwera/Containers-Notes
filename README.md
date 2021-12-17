@@ -561,6 +561,119 @@ kube-proxy option
 </details>
 </table>
 
+ 
+ # cgroups
+
+Show capabilities of current user
+```
+capsh --print
+```
+Or docker:
+```
+docker run --rm -it scionproto/docker-caps
+
+Current: = cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap+eip
+Bounding set =cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap
+Ambient set =
+Securebits: 00/0x0/1'b0
+ secure-noroot: no (unlocked)
+ secure-no-suid-fixup: no (unlocked)
+ secure-keep-caps: no (unlocked)
+ secure-no-ambient-raise: no (unlocked)
+uid=0(???)
+gid=0(???)
+groups=
+
+```
+
+```
+docker run --rm -it --cap-add chown --cap-drop net_raw scionproto/docker-caps
+
+Current: = cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap+eip
+Bounding set =cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap
+Ambient set =
+Securebits: 00/0x0/1'b0
+ secure-noroot: no (unlocked)
+ secure-no-suid-fixup: no (unlocked)
+ secure-keep-caps: no (unlocked)
+ secure-no-ambient-raise: no (unlocked)
+uid=0(???)
+gid=0(???)
+groups=
+```
+
+The hex digits represent the capabilities in the set. Capsh can decode this. 
+
+For normal user:
+```
+grep Cap /proc/$BASHPID/status
+
+CapInh: 0000000000000000
+CapPrm: 0000000000000000
+CapEff: 0000000000000000
+CapBnd: 0000003fffffffff
+CapAmb: 0000000000000000
+
+capsh --decode=0000003fffffffff
+```
+
+For root user:
+```
+CapInh: 0000000000000000
+CapPrm: 0000003fffffffff
+CapEff: 0000003fffffffff
+CapBnd: 0000003fffffffff
+CapAmb: 0000000000000000
+```
+
+
+## Assigning Capabilities to Executables
+
+Processes can gain capabilities in the bounding set from appropriately configured executables.
+The ping utility is installed as a setuid binary (which effectively means it runs as root).
+```
+
+which ping
+/bin/ping
+ls -l /bin/ping
+-rwsr-xr-x 1 root root 64424 Mar 9 2017 /bin/ping
+
+sudo cp `which ping` myping
+
+ls -l myping
+-rwxr-xr-x 1 root root 72776 Dec 17 20:59 myping
+
+
+./myping p.pl
+./myping: socket: Operation not permitted
+
+sudo setcap 'cap_net_raw+p' ./myping
+
+./myping p.pl
+PING p.pl (81.2.200.20) 56(84) bytes of data.
+
+getcap ./myping
+./myping = cap_net_raw+p
+```
+
+```
+cp /bin/sleep mysleep
+ls -l mysleep
+-rwxr-xr-x 1 user user 39256 Dec 17 20:53 mysleep
+sudo ./mysleep 1000
+(on another terminal) ps ps ajf
+
+    9  5659  5659     9 pts/0     5659 S+       0   0:00  \_ sudo ./mysleep 1000
+ 5659  5660  5659     9 pts/0     5659 S+       0   0:00      \_ ./mysleep 1000
+ 
+ chmod +s mysleep
+ ls -l mysleep
+ -rwsr-sr-x 1 user user 39256 Dec 17 20:53 mysleep
+ 
+     9  5703  5703     9 pts/0     5703 S+       0   0:00  \_ sudo ./mysleep 1000
+ 5703  5704  5703     9 pts/0     5703 S+    1000   0:00      \_ ./mysleep 1000
+```
+
 
 
 # Linux features
